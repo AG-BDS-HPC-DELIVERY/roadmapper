@@ -44,12 +44,12 @@ class Painter:
     left_margin = 30
     right_margin = 30
 
-    group_box_width_percentage = 0.2
+    group_box_width_percentage = 0.15
     timeline_width_percentage = 1 - group_box_width_percentage
     gap_between_group_box_and_timeline = 20
     gap_between_timeline_and_title = 20
     gap_between_timeline_item = 3
-    gap_between_timeline_group_item = 3
+    gap_between_timeline_group_item = 5
 
     additional_height_for_milestone = 15
 
@@ -551,11 +551,12 @@ class PNGPainter(Painter):
 
         # ** wrap text
         for line in multi_lines:
-            wrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
+            # wrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
+            wrap_lines.extend(textwrap.wrap(line, len(line)))
 
         pad = 4
         line_count = len(wrap_lines)
-
+        bold_i = 0
         for i, line in enumerate(wrap_lines):
             font_width, font_height = self.get_text_dimension(
                 line, text_font, text_font_size
@@ -580,8 +581,13 @@ class PNGPainter(Painter):
                 + ((box_height - total_line_height) / 2)
                 + ((single_line_height * i) + (pad * i))
             )
-
-            self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
+            if bold_i == 0 and len(multi_lines) > 1:
+                font = ImageFont.truetype(self.get_font_path("Montserrat-Bold.ttf"), size=text_font_size)
+                bold_i = +1
+                self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
+            else:
+                font = ImageFont.truetype(self.get_font_path(text_font), size=(text_font_size-2))
+                self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
 
     def draw_text_on_box(
         self,
@@ -624,11 +630,12 @@ class PNGPainter(Painter):
 
         # ** wrap text
         for line in multi_lines:
-            wrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
+            #wrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
+            wrap_lines.extend(textwrap.wrap(line, len(line)))
 
         pad = 4
         line_count = len(wrap_lines)
-
+        bold_i = 0
         for i, line in enumerate(wrap_lines):
             font_width, font_height = self.get_text_dimension(
                 line, text_font, text_font_size
@@ -652,9 +659,14 @@ class PNGPainter(Painter):
                 box_y1
                 + ((box_height - total_line_height) / 2)
                 + ((single_line_height * i) + (pad * i))
-            )
-
-            self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
+            )            
+            if bold_i == 0 and len(multi_lines) > 1:
+                font = ImageFont.truetype(self.get_font_path("Montserrat-Bold.ttf"), size=text_font_size)
+                bold_i = +1
+                self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
+            else:
+                font = ImageFont.truetype(self.get_font_path(text_font), size=(text_font_size-2))
+                self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
 
     def draw_diamond(
         self, x: int, y: int, width: int, height: int, fill_colour: str
@@ -1037,7 +1049,7 @@ class SVGPainter(Painter):
         )
 
         font = ImageFont.truetype(self.get_font_path(text_font), size=text_font_size)
-
+        
         multi_lines = []
         wrap_lines = []
 
