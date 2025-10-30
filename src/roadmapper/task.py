@@ -162,7 +162,8 @@ class Task:
             last_drawn_y (int): Last drawn y position
             timeline (Timeline): Timeline object
         """
-        task_y = last_drawn_y + 10
+        pad = 5
+        task_y = last_drawn_y + pad
 
         milestone_in_tasks = False
         if len(self.milestones) > 0:
@@ -192,7 +193,7 @@ class Task:
             task.set_draw_position(
                 painter,
                 self.box_x,
-                for_parallel_tasks_y - 10,
+                for_parallel_tasks_y - pad ,
                 timeline,
                 milestone_exists_in_parent=milestone_in_tasks,
             )

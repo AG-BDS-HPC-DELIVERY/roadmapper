@@ -49,7 +49,7 @@ class Painter:
     gap_between_group_box_and_timeline = 20
     gap_between_timeline_and_title = 20
     gap_between_timeline_item = 3
-    gap_between_timeline_group_item = 5
+    gap_between_timeline_group_item = 3
 
     additional_height_for_milestone = 15
 
@@ -980,7 +980,7 @@ class SVGPainter(Painter):
         for line in multi_lines:
             wrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
 
-        pad = 4
+        pad = 4 
         line_count = len(wrap_lines)
 
         for i, line in enumerate(wrap_lines):
