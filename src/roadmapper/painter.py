@@ -537,7 +537,6 @@ class PNGPainter(Painter):
                 )
             case _:
                 raise ValueError("Invalid style")
-
         font = ImageFont.truetype(self.get_font_path(text_font), size=text_font_size)
 
         multi_lines = []
