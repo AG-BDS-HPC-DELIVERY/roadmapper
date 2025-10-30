@@ -187,7 +187,24 @@ class Group:
             self.font_size,
             self.font_colour,
         )
+        # Step 2: draw group
+        painter.draw_box(
+            (painter.left_margin
+            + painter.gap_between_group_box_and_timeline
+            + self.box_width
+        ),
+            self.box_y,
+            (painter.width
+            - (painter.left_margin + painter.right_margin)
+            - painter.gap_between_group_box_and_timeline
+        ) * painter.timeline_width_percentage,
+            self.box_height,
+            self.fill_colour+"15",
+        )
 
+
+
+    def draw_task(self, painter: Painter) -> None:
         # Step 2: draw tasks
         for tasks in self.tasks:
             tasks.draw(painter)

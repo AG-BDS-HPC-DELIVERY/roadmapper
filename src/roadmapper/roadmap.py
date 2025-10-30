@@ -386,13 +386,16 @@ class Roadmap:
         for group in self._groups:
             group.set_draw_position(self._painter, self._timeline)
 
+        for group in self._groups:
+            group.draw(self._painter)
         ### Draw timeline vertical lines on the roadmap
         self._timeline.draw_vertical_lines(self._painter)
 
         ### Draw the roadmap groups
         for group in self._groups:
-            group.draw(self._painter)
-
+            group.draw_task(self._painter)
+        
+    
         ### Draw the roadmap marker
         if self._marker is not None and self._show_generic_dates is False:
             self._marker.set_line_draw_position(self._painter)
