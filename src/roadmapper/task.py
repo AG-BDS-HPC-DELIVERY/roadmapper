@@ -56,6 +56,8 @@ class Task:
     text_x: int = field(init=False, default=0)
     text_y: int = field(init=False, default=0)
 
+    icon_path: str = field(init=True, default=None)
+
     def add_parallel_task(
         self,
         text: str,
@@ -67,6 +69,7 @@ class Task:
         fill_colour: str = "",
         text_alignment: str = "centre",
         style: str = "rectangle",
+        icon_path: str = None
     ):
         """Add a parallel task to this task
 
@@ -87,6 +90,7 @@ class Task:
         font_colour = font_colour or self.painter.task_font_colour
         fill_colour = fill_colour or self.painter.task_fill_colour
         style = style or self.painter.task_style
+        icon_path = icon_path or self.painter.icon_path
 
         task = Task(
             text=text,
@@ -99,6 +103,7 @@ class Task:
             text_alignment=text_alignment,
             style=style,
             painter=self.painter,
+            icon_path=self.icon_path,
         )
         self.tasks.append(task)
 
@@ -605,6 +610,7 @@ class Task:
                 self.font_size,
                 self.font_colour,
                 style=self.style,
+                icon_path=self.icon_path,
             )
 
             # ** Fix for v1.4.1 - Draw milestone first before task text

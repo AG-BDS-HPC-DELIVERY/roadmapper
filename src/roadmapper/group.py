@@ -47,6 +47,8 @@ class Group:
     text_y: int = field(init=False, default=0)
     painter: Painter = None
 
+    icon_path: str = field(init=True, default=None)
+
     # def __post_init__(self):
     #     """This method is called after __init__() is called"""
     #     self.tasks = []
@@ -64,6 +66,7 @@ class Group:
         fill_colour: str = "",
         text_alignment: str = "centre",
         style: str = "rectangle",
+        icon_path: str = None,
     ) -> Task:
         """Add new task to group
 
@@ -86,6 +89,7 @@ class Group:
         font_colour = font_colour or self.painter.task_font_colour
         fill_colour = fill_colour or self.painter.task_fill_colour
         style = style or self.painter.task_style
+        icon_path = icon_path or self.painter.icon_path
 
         task = Task(
             text=text,
@@ -98,6 +102,7 @@ class Group:
             text_alignment=text_alignment,
             style=style,
             painter=self.painter,
+            icon_path=icon_path,
         )
 
         self.tasks.append(task)
@@ -185,6 +190,8 @@ class Group:
             self.font,
             self.font_size,
             self.font_colour,
+            "rectangle",
+            self.icon_path,
         )
         # Step 2: draw group
         painter.draw_box(

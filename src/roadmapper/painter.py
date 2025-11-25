@@ -27,6 +27,14 @@ from .colourtheme import ColourTheme
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 import drawsvg as dw
 
+gtkbin = r'C:\Program Files\GTK3-Runtime Win64\bin'
+add_dll_dir = getattr(os, 'add_dll_directory', None)
+if callable(add_dll_dir):
+    add_dll_dir(gtkbin)
+else:
+    os.environ['PATH'] = os.pathsep.join((gtkbin, os.environ['PATH']))
+import cairosvg
+
 import textwrap
 
 
@@ -106,6 +114,8 @@ class Painter:
     font: str
     font_size: int
 
+    icon_path: str
+
     def __init__(self, width: int, height: int):
         """__init__ method
 
@@ -116,6 +126,7 @@ class Painter:
         self.width = width
         self.height = height
         self.next_y_pos = 0
+        self.icon_path = None
 
     def set_colour_theme(self, colour_theme: str) -> None:
         """Set colour palette
@@ -323,6 +334,7 @@ class Painter:
         text_font_size: int,
         text_font_colour: str,
         style: str = "rectangle",
+        icon_path: str = None,
     ) -> tuple:
         return (
             box_x,
@@ -416,7 +428,7 @@ class Painter:
 
 class PNGPainter(Painter):
     """A wrapper class for Pillow library"""
-
+    
     # initialise code
     def __init__(self, width: int, height: int):
         """__init__ method
@@ -431,6 +443,33 @@ class PNGPainter(Painter):
 
         self.__cr = ImageDraw.Draw(self.__surface)
 
+    def insert_svg_next_to_box(self, svg_path: str, box_x: int, box_y: int,
+                            box_width: int, box_height: int, margin: int = 10) -> bool:
+        
+        if not svg_path:
+                return False
+
+        # Convert SVG to PNG if needed
+        png_path = svg_path
+        if svg_path.endswith('.svg'):
+            png_path = svg_path.replace('.svg', '.png')
+            cairosvg.svg2png(url=svg_path, write_to=png_path)
+
+        img = Image.open(png_path).convert("RGBA")
+        orig_width, orig_height = img.size
+
+        new_height = box_height - margin
+        scale = new_height / orig_height
+        new_width = int(orig_width * scale)
+
+        if box_x - new_width - margin - 400 < 0:
+            return False
+
+        img = img.resize((new_width, new_height), Image.LANCZOS)
+        self.__surface.paste(img, (box_x - new_width - margin, box_y), img)  # img as mask works now
+        return True
+
+    
     def draw_box(
         self, x: int, y: int, width: int, height: int, box_fill_colour: str
     ) -> None:
@@ -468,7 +507,7 @@ class PNGPainter(Painter):
             # width=1,
             corners=(1, 1, 1, 1),
         )
-
+    
     def draw_arrowhead_box(
         self, x: int, y: int, width: int, height: int, box_fill_colour: str
     ) -> None:
@@ -504,6 +543,7 @@ class PNGPainter(Painter):
         text_font_size: int,
         text_font_colour: str,
         style: str = "rectangle",
+        icon_path: str = None,
     ) -> None:
         box_x1, box_y1, box_x2, box_y2 = super().draw_box_with_text(
             box_x,
@@ -517,7 +557,12 @@ class PNGPainter(Painter):
             text_font_size,
             text_font_colour,
             style,
+            icon_path,
         )
+        if icon_path != None:
+            self.icon_path = icon_path
+            svg_inserted = self.insert_svg_next_to_box(icon_path, box_x1, box_y1, box_width, box_height)
+
         match style:
             case "rectangle":
                 self.draw_box(
@@ -601,6 +646,7 @@ class PNGPainter(Painter):
         text_font_size: int,
         text_font_colour: str,
         style: str = "rectangle",
+        icon_path: str = None,
     ) -> None:
         box_x1, box_y1, box_x2, box_y2 = super().draw_box_with_text(
             box_x,
@@ -614,6 +660,7 @@ class PNGPainter(Painter):
             text_font_size,
             text_font_colour,
             style,
+            icon_path,
         )
 
         font = ImageFont.truetype(self.get_font_path(text_font), size=text_font_size)
@@ -930,6 +977,7 @@ class SVGPainter(Painter):
         text_font_size: int,
         text_font_colour: str,
         style: str = "rectangle",
+        icon_path: str = None,
     ) -> None:
         box_x1, box_y1, box_x2, box_y2 = super().draw_box_with_text(
             box_x,
@@ -943,7 +991,12 @@ class SVGPainter(Painter):
             text_font_size,
             text_font_colour,
             style,
+            icon_path,
         )
+        if icon_path != None:
+            self.icon_path = icon_path
+            svg_inserted = self.insert_svg_next_to_box(icon_path, box_x1, box_y1, box_width, box_height)
+        
         match style:
             case "rectangle":
                 self.draw_box(
@@ -977,7 +1030,8 @@ class SVGPainter(Painter):
 
         ### wrap text
         for line in multi_lines:
-            wrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
+            #MATwrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
+            wrap_lines.extend(textwrap.wrap(line, len(line)))
 
         pad = 4 
         line_count = len(wrap_lines)
@@ -1032,6 +1086,7 @@ class SVGPainter(Painter):
         text_font_size: int,
         text_font_colour: str,
         style: str = "rectangle",
+        icon_path: str = None,
     ) -> None:
         box_x1, box_y1, box_x2, box_y2 = super().draw_box_with_text(
             box_x,
@@ -1045,6 +1100,7 @@ class SVGPainter(Painter):
             text_font_size,
             text_font_colour,
             style,
+            icon_path
         )
 
         font = ImageFont.truetype(self.get_font_path(text_font), size=text_font_size)
@@ -1060,7 +1116,8 @@ class SVGPainter(Painter):
 
         # ** wrap text
         for line in multi_lines:
-            wrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
+            #MATwrap_lines.extend(textwrap.wrap(line, int(box_width / single_char_width)))
+            wrap_lines.extend(textwrap.wrap(line, len(line)))
 
         pad = 4
         line_count = len(wrap_lines)
@@ -1199,6 +1256,34 @@ class SVGPainter(Painter):
                         stroke_width=line_width,
                     )
                     self.elements.append(line)
+
+    def insert_svg_next_to_box(self, svg_path: str, box_x: int, box_y: int,
+                            box_width: int, box_height: int, margin: int = 5) -> bool:
+        """Insert an SVG image to the left of the box if space allows."""
+        # Convert SVG to PNG for easier handling
+        if svg_path != None:
+            if svg_path.endswith('.svg'):
+                png_path = svg_path.replace('.svg', '.png')
+                cairosvg.svg2png(url=svg_path, write_to=png_path)
+            else:
+                png_path = svg_path
+            # Open image to get original dimensions
+            img = Image.open(png_path)
+            orig_width, orig_height = img.size
+
+            # Compute new dimensions maintaining aspect ratio
+            new_height = box_height - margin
+            scale = new_height / orig_height
+            new_width = int(orig_width * scale)
+
+            # Check if image fits before the box
+            if box_x - new_width - margin < 0:
+                return False  # Not enough space, skip image
+
+            # Add image element
+            img_element = dw.Image(box_x - new_width - margin, box_y, new_width, new_height, png_path)
+            self.elements.append(img_element)
+        return True
 
     def draw_cross_on_box(
         self, x1: int, y1: int, x2: int, y2: int, colour: str
