@@ -444,7 +444,7 @@ class PNGPainter(Painter):
         self.__cr = ImageDraw.Draw(self.__surface)
 
     def insert_svg_next_to_box(self, svg_path: str, box_x: int, box_y: int,
-                            box_width: int, box_height: int, margin: int = 10) -> bool:
+                            box_width: int, box_height: int, margin: int = 20) -> bool:
         
         if not svg_path:
                 return False
@@ -462,11 +462,11 @@ class PNGPainter(Painter):
         scale = new_height / orig_height
         new_width = int(orig_width * scale)
 
-        if box_x - new_width - margin - 400 < 0:
+        if box_x - new_width - margin - 350 < 0:
             return False
 
         img = img.resize((new_width, new_height), Image.LANCZOS)
-        self.__surface.paste(img, (box_x - new_width - margin, box_y), img)  # img as mask works now
+        self.__surface.paste(img, (box_x - new_width - margin, box_y + 5), img)  # img as mask works now
         return True
 
     
@@ -630,7 +630,7 @@ class PNGPainter(Painter):
                 bold_i = +1
                 self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
             else:
-                font = ImageFont.truetype(self.get_font_path(text_font), size=(text_font_size-2))
+                font = ImageFont.truetype(self.get_font_path(text_font), size=(text_font_size-3))
                 self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
 
     def draw_text_on_box(
@@ -711,7 +711,7 @@ class PNGPainter(Painter):
                 bold_i = +1
                 self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
             else:
-                font = ImageFont.truetype(self.get_font_path(text_font), size=(text_font_size-2))
+                font = ImageFont.truetype(self.get_font_path(text_font), size=(text_font_size-3))
                 self.__cr.text((x, y), line, fill=text_font_colour, anchor="la", font=font)
 
     def draw_diamond(
@@ -1258,7 +1258,7 @@ class SVGPainter(Painter):
                     self.elements.append(line)
 
     def insert_svg_next_to_box(self, svg_path: str, box_x: int, box_y: int,
-                            box_width: int, box_height: int, margin: int = 5) -> bool:
+                            box_width: int, box_height: int, margin: int = 20) -> bool:
         """Insert an SVG image to the left of the box if space allows."""
         # Convert SVG to PNG for easier handling
         if svg_path != None:
@@ -1277,11 +1277,11 @@ class SVGPainter(Painter):
             new_width = int(orig_width * scale)
 
             # Check if image fits before the box
-            if box_x - new_width - margin < 0:
+            if box_x - new_width - margin - 350 < 0:
                 return False  # Not enough space, skip image
 
             # Add image element
-            img_element = dw.Image(box_x - new_width - margin, box_y, new_width, new_height, png_path)
+            img_element = dw.Image(box_x - new_width - margin, box_y + 5, new_width, new_height, png_path)
             self.elements.append(img_element)
         return True
 
